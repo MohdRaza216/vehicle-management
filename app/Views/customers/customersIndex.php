@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Customer List</title>
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 </head>
 
 <body class="container mt-4">
@@ -23,6 +26,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Mobile Number</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -33,6 +37,12 @@
                     <td><?= esc($customer['name']) ?></td>
                     <td><?= esc($customer['email']) ?></td>
                     <td><?= esc($customer['mobile_number']) ?></td>
+                    <td>
+                        <a href="<?= base_url('customers/delete/' . $customer['id']) ?>" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Are you sure you want to delete this customer?');">
+                            Delete
+                        </a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
@@ -72,6 +82,8 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
 </body>
+
 </html>

@@ -30,4 +30,12 @@ class CustomersController extends BaseController
         return redirect()->to('/customers')->with('success', 'Customer Added Successfully');
     }
 
+    public function delete($id)
+    {
+        $customerModel = new \App\Models\CustomerModel();
+        $customerModel->delete($id);
+
+        return redirect()->to('/customers')->with('success', 'Customer Deleted Successfully');
+    }
+
 }
