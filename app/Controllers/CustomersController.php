@@ -14,4 +14,20 @@ class CustomersController extends BaseController
 
         return view('customers/customersIndex', $data);
     }
+
+    public function store()
+    {
+        $customerModel = new \App\Models\CustomerModel();
+
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'email' => $this->request->getPost('email'),
+            'mobile_number' => $this->request->getPost('mobile_number'),
+        ];
+
+        $customerModel->insert($data);
+
+        return redirect()->to('/customers')->with('success', 'Customer Added Successfully');
+    }
+
 }
