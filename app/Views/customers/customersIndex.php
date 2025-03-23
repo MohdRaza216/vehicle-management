@@ -57,32 +57,24 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="<?= base_url('customers/store') ?>" method="post">
+                <form id="addCustomerForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Add Customer</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <?php if (session()->getFlashdata('errors')) : ?>
-                            <div class="alert alert-danger">
-                                <ul>
-                                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                                        <li><?= esc($error) ?></li>
-                                    <?php endforeach ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
+                        <div id="addErrorMsg" class="alert alert-danger d-none"></div>
                         <div class="mb-3">
-                            <label for="name">Name:</label>
-                            <input type="text" name="name" class="form-control" value="<?= old('name') ?>">
+                            <label>Name:</label>
+                            <input type="text" name="name" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="email">Email:</label>
-                            <input type="email" name="email" class="form-control" value="<?= old('email') ?>">
+                            <label>Email:</label>
+                            <input type="email" name="email" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="mobile_number">Mobile Number:</label>
-                            <input type="text" name="mobile_number" class="form-control" value="<?= old('mobile_number') ?>">
+                            <label>Mobile Number:</label>
+                            <input type="text" name="mobile_number" class="form-control">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -99,32 +91,24 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="editCustomerForm" method="post">
+                <form id="editCustomerForm">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Customer</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <?php if (session()->getFlashdata('errors')) : ?>
-                            <div class="alert alert-danger">
-                                <ul>
-                                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                                        <li><?= esc($error) ?></li>
-                                    <?php endforeach ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
+                        <div id="editErrorMsg" class="alert alert-danger d-none"></div>
                         <input type="hidden" name="id" id="editCustomerId">
                         <div class="mb-3">
-                            <label for="name">Name:</label>
+                            <label>Name:</label>
                             <input type="text" name="name" id="editCustomerName" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="email">Email:</label>
+                            <label>Email:</label>
                             <input type="email" name="email" id="editCustomerEmail" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label for="mobile_number">Mobile Number:</label>
+                            <label>Mobile Number:</label>
                             <input type="text" name="mobile_number" id="editCustomerMobile" class="form-control">
                         </div>
                     </div>
@@ -137,15 +121,35 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- jQuery -->
+    <!-- Bootstrap JS & jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <!-- Edit Modal Fill -->
+    <!-- AJAX for Add and Edit -->
     <script>
         $(document).ready(function () {
+            // Add Customer AJAX
+            $('#addCustomerForm').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: "<?= base_url('customers/store') ?>",
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'error') {
+                            $('#addErrorMsg').removeClass('d-none').html(response.errors);
+                        } else {
+                            $('#addCustomerModal').modal('hide');
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1000);
+                        }
+                    }
+                });
+            });
+
+            // Edit Customer Modal Prefill
             $('.editBtn').on('click', function () {
                 const id = $(this).data('id');
                 const name = $(this).data('name');
@@ -156,38 +160,48 @@
                 $('#editCustomerName').val(name);
                 $('#editCustomerEmail').val(email);
                 $('#editCustomerMobile').val(mobile);
-
-                $('#editCustomerForm').attr('action', '/vehicle-management/public/customers/update/' + id);
             });
 
-            <?php if (session()->getFlashdata('showAddModal')) : ?>
-                $('#addCustomerModal').modal('show');
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('showEditModal')) : ?>
-                const editId = "<?= session()->getFlashdata('editCustomerId') ?>";
-                $('#editCustomerForm').attr('action', '/vehicle-management/public/customers/update/' + editId);
-                $('#editCustomerModal').modal('show');
-            <?php endif; ?>
+            // Edit Customer AJAX
+            $('#editCustomerForm').submit(function (e) {
+                e.preventDefault();
+                const id = $('#editCustomerId').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "<?= base_url('customers/update/') ?>" + id,
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'error') {
+                            $('#editErrorMsg').removeClass('d-none').html(response.errors);
+                        } else {
+                            $('#editCustomerModal').modal('hide');
+                            toastr.success(response.message);
+                            setTimeout(() => location.reload(), 1000);
+                        }
+                    }
+                });
+            });
         });
     </script>
 
-    <!-- Flash Messages (Toastr optional) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!-- Flash Messages -->
     <script>
         toastr.options = {
             "closeButton": true,
-            "progressBar": true,
             "positionClass": "toast-top-right",
-            "timeOut": "3000"
+            "timeOut": "1000"
         }
+
         <?php if (session()->getFlashdata('success')): ?>
             toastr.success("<?= session()->getFlashdata('success') ?>");
         <?php endif; ?>
+
         <?php if (session()->getFlashdata('error')): ?>
             toastr.error("<?= session()->getFlashdata('error') ?>");
         <?php endif; ?>
     </script>
+
 </body>
 
 </html>

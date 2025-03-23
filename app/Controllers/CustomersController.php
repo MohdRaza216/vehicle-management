@@ -3,10 +3,10 @@
 namespace App\Controllers;
 
 use App\Models\CustomerModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class CustomersController extends BaseController
 {
-    // Show all customers
     public function index()
     {
         $customerModel = new CustomerModel();
@@ -26,34 +26,35 @@ class CustomersController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('showAddModal', true);
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $validation->listErrors(),
+            ]);
         }
-        
 
-        $customerModel = new \App\Models\CustomerModel();
+        $model = new CustomerModel();
+        $email = $this->request->getPost('email');
+
+        // Duplicate Email Check
+        $existingCustomer = $model->where('email', $email)->first();
+        if ($existingCustomer) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => 'Customer with this email already exists!',
+            ]);
+        }
 
         $data = [
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
+            'name'  => $this->request->getPost('name'),
+            'email' => $email,
             'mobile_number' => $this->request->getPost('mobile_number'),
         ];
+        $model->insert($data);
 
-        $customerModel->insert($data);
-
-        return redirect()->to('/customers')->with('success', 'Customer Added Successfully');
-    }
-
-    public function edit($id)
-    {
-        $customerModel = new CustomerModel();
-        $data['customer'] = $customerModel->find($id);
-
-        if (!$data['customer']) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Customer not found');
-        }
-
-        return view('customers/editCustomerForm', $data);
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Customer added successfully!',
+        ]);
     }
 
     public function update($id)
@@ -67,32 +68,42 @@ class CustomersController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('showEditModal', true);
-            session()->setFlashdata('editCustomerId', $id);
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $validation->listErrors(),
+            ]);
         }
-        
 
-        $customerModel = new CustomerModel();
+        $model = new CustomerModel();
+        $email = $this->request->getPost('email');
+
+        // Duplicate Email Check (excluding current customer)
+        $existingCustomer = $model->where('email', $email)->where('id !=', $id)->first();
+        if ($existingCustomer) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => 'Another customer with this email already exists!',
+            ]);
+        }
+
         $data = [
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
+            'name'  => $this->request->getPost('name'),
+            'email' => $email,
             'mobile_number' => $this->request->getPost('mobile_number'),
         ];
+        $model->update($id, $data);
 
-        if ($customerModel->update($id, $data)) {
-            return redirect()->to('/customers')->with('success', 'Customer updated successfully');
-        } else {
-            return redirect()->back()->with('error', 'Failed to update customer');
-        }
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Customer updated successfully!',
+        ]);
     }
 
     public function delete($id)
     {
-        $customerModel = new \App\Models\CustomerModel();
-        $customerModel->delete($id);
+        $model = new CustomerModel();
+        $model->delete($id);
 
-        return redirect()->to('/customers')->with('success', 'Customer Deleted Successfully');
+        return redirect()->to('/customers')->with('success', 'Customer deleted successfully!');
     }
-
 }
