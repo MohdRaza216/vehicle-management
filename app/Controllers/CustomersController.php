@@ -17,6 +17,20 @@ class CustomersController extends BaseController
 
     public function store()
     {
+        $validation = \Config\Services::validation();
+
+        $rules = [
+            'name' => 'required|min_length[3]',
+            'email' => 'required|valid_email',
+            'mobile_number' => 'required|numeric|min_length[10]',
+        ];
+
+        if (!$this->validate($rules)) {
+            session()->setFlashdata('showAddModal', true);
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+        
+
         $customerModel = new \App\Models\CustomerModel();
 
         $data = [
@@ -44,6 +58,21 @@ class CustomersController extends BaseController
 
     public function update($id)
     {
+        $validation = \Config\Services::validation();
+
+        $rules = [
+            'name' => 'required|min_length[3]',
+            'email' => 'required|valid_email',
+            'mobile_number' => 'required|numeric|min_length[10]',
+        ];
+
+        if (!$this->validate($rules)) {
+            session()->setFlashdata('showEditModal', true);
+            session()->setFlashdata('editCustomerId', $id);
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+        
+
         $customerModel = new CustomerModel();
         $data = [
             'name' => $this->request->getPost('name'),

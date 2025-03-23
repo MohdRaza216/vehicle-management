@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
 </head>
 
 <body>
@@ -32,19 +31,19 @@
                 foreach ($customers as $customer): ?>
                     <tr>
                         <td><?= $i++ ?></td>
-                        <td><?= $customer['name'] ?></td>
-                        <td><?= $customer['email'] ?></td>
-                        <td><?= $customer['mobile_number'] ?></td>
+                        <td><?= esc($customer['name']) ?></td>
+                        <td><?= esc($customer['email']) ?></td>
+                        <td><?= esc($customer['mobile_number']) ?></td>
                         <td>
                             <button class="btn btn-primary editBtn" data-id="<?= $customer['id'] ?>"
                                 data-name="<?= $customer['name'] ?>" data-email="<?= $customer['email'] ?>"
                                 data-mobile="<?= $customer['mobile_number'] ?>" data-bs-toggle="modal"
                                 data-bs-target="#editCustomerModal">Edit</button>
 
-                            <form action="/vehicle-management/public/customers/delete/<?= $customer['id'] ?>" method="post"
+                            <form action="<?= base_url('customers/delete/' . $customer['id']) ?>" method="post"
                                 style="display:inline;">
-                                <button type="button" class="btn btn-danger"
-                                    onclick="confirmDelete(<?= $customer['id'] ?>)">Delete</button>
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to delete?')">Delete</button>
                             </form>
                         </td>
                     </tr>
@@ -58,23 +57,32 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="/vehicle-management/public/customers/store" method="post">
+                <form action="<?= base_url('customers/store') ?>" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title">Add Customer</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        <?php if (session()->getFlashdata('errors')) : ?>
+                            <div class="alert alert-danger">
+                                <ul>
+                                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
+                                        <li><?= esc($error) ?></li>
+                                    <?php endforeach ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
                         <div class="mb-3">
                             <label for="name">Name:</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="name" class="form-control" value="<?= old('name') ?>">
                         </div>
                         <div class="mb-3">
                             <label for="email">Email:</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" value="<?= old('email') ?>">
                         </div>
                         <div class="mb-3">
                             <label for="mobile_number">Mobile Number:</label>
-                            <input type="text" name="mobile_number" class="form-control" required>
+                            <input type="text" name="mobile_number" class="form-control" value="<?= old('mobile_number') ?>">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -97,19 +105,27 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        <?php if (session()->getFlashdata('errors')) : ?>
+                            <div class="alert alert-danger">
+                                <ul>
+                                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
+                                        <li><?= esc($error) ?></li>
+                                    <?php endforeach ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
                         <input type="hidden" name="id" id="editCustomerId">
                         <div class="mb-3">
                             <label for="name">Name:</label>
-                            <input type="text" name="name" id="editCustomerName" class="form-control" required>
+                            <input type="text" name="name" id="editCustomerName" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label for="email">Email:</label>
-                            <input type="email" name="email" id="editCustomerEmail" class="form-control" required>
+                            <input type="email" name="email" id="editCustomerEmail" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label for="mobile_number">Mobile Number:</label>
-                            <input type="text" name="mobile_number" id="editCustomerMobile" class="form-control"
-                                required>
+                            <input type="text" name="mobile_number" id="editCustomerMobile" class="form-control">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -121,21 +137,13 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS & jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
-
-    <!-- jQuery (Toastr needs it) -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Edit Modal Script -->
+    <!-- Edit Modal Fill -->
     <script>
         $(document).ready(function () {
             $('.editBtn').on('click', function () {
@@ -151,48 +159,31 @@
 
                 $('#editCustomerForm').attr('action', '/vehicle-management/public/customers/update/' + id);
             });
+
+            <?php if (session()->getFlashdata('showAddModal')) : ?>
+                $('#addCustomerModal').modal('show');
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('showEditModal')) : ?>
+                const editId = "<?= session()->getFlashdata('editCustomerId') ?>";
+                $('#editCustomerForm').attr('action', '/vehicle-management/public/customers/update/' + editId);
+                $('#editCustomerModal').modal('show');
+            <?php endif; ?>
         });
     </script>
 
+    <!-- Flash Messages (Toastr optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit form programmatically
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '<?= base_url('customers/delete/') ?>' + id;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-    </script>
-
-    <!-- Flash Messages -->
-    <script>
-        // Toastr Styling Options
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
             "positionClass": "toast-top-right",
             "timeOut": "3000"
         }
-
-        // Display success message
         <?php if (session()->getFlashdata('success')): ?>
             toastr.success("<?= session()->getFlashdata('success') ?>");
         <?php endif; ?>
-
-        // Display error message
         <?php if (session()->getFlashdata('error')): ?>
             toastr.error("<?= session()->getFlashdata('error') ?>");
         <?php endif; ?>
