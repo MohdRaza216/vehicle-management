@@ -15,3 +15,4 @@ $routes->post('/customers/delete/(:num)', [\App\Controllers\CustomersController:
 
 // Vehicles Page
 $routes->get('/vehicles', [\App\Controllers\VehiclesController::class, 'index']);
+$routes->post('/vehicles/add', [\App\Controllers\VehiclesController::class, 'add']);

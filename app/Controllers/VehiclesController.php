@@ -22,4 +22,28 @@ class VehiclesController extends BaseController
         return view('vehicles/vehiclesIndex', $data);
     }
 
+    public function add()
+    {
+        try {
+            $vehicleModel = new VehicleModel();
+
+            $data = [
+                'name' => $this->request->getPost('name'),
+                'model' => $this->request->getPost('model'),
+                'price' => $this->request->getPost('price'),
+                'status' => $this->request->getPost('status'),
+            ];
+
+            if ($vehicleModel->insert($data)) {
+                return $this->response->setJSON(['status' => 'success']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => $vehicleModel->errors()]);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Error in add() method: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+
 }

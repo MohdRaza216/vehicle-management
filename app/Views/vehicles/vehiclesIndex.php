@@ -23,20 +23,21 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Sr No</th>
                     <th>Vehicle Name</th>
-                    <th>Model</th>
+                    <th>Vehicle Model</th>
                     <th>Price</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (!empty($vehicles)): ?>
-                    <?php foreach ($vehicles as $vehicle): ?>
+                    <?php $i = 1;
+                    foreach ($vehicles as $vehicle): ?>
                         <tr>
-                            <td><?= esc($vehicle['id']) ?></td>
-                            <td><?= esc($vehicle['vehicle_name']) ?></td>
-                            <td><?= esc($vehicle['vehicle_model']) ?></td>
+                            <td><?= $i++ ?></td>
+                            <td><?= esc($vehicle['name']) ?></td>
+                            <td><?= esc($vehicle['model']) ?></td>
                             <td><?= esc($vehicle['price']) ?></td>
                             <td><?= esc($vehicle['status']) ?></td>
                         </tr>
@@ -62,12 +63,12 @@
                 <form id="addVehicleForm">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="vehicle_name" class="form-label">Vehicle Name</label>
-                            <input type="text" class="form-control" id="vehicle_name" name="vehicle_name" required>
+                            <label for="name" class="form-label">Vehicle Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="vehicle_model" class="form-label">Vehicle Model</label>
-                            <input type="text" class="form-control" id="vehicle_model" name="vehicle_model" required>
+                            <label for="model" class="form-label">Vehicle Model</label>
+                            <input type="text" class="form-control" id="model" name="model" required>
                         </div>
                         <div class="mb-3">
                             <label for="price" class="form-label">Price</label>
@@ -100,46 +101,51 @@
         crossorigin="anonymous"></script>
     <script src="<?= base_url() ?>/assets/js/toastr.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            $("#addVehicleForm").submit(function (e) {
-                e.preventDefault(); // Prevent default form submission
-
-                $.ajax({
-                    url: "<?= base_url('vehicles/add') ?>",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    dataType: "json",
-                    success: function (response) {
-                        if (response.status == "success") {
-                            toastr.success("Vehicle added successfully!", "Success");
-                            location.reload(); // Refresh the page to show new vehicle
-                        } else {
-                            toastr.success("Error adding vehicle.", "Success");
-                        }
-                    }
-                });
-            });
-        });
-    </script>
 
     <!-- Flash Messages -->
     <script>
-        toastr.options = {
-            "closeButton": true,
-            "positionClass": "toast-top-right",
-            "progressBar": "true",
-            "timeOut": "3000"
+    toastr.options = {
+        "closeButton": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000",
+        "preventDuplicates": true
+    };
+
+    $(document).ready(function () {
+        let successMsg = "<?= session()->getFlashdata('success') ?>";
+        let errorMsg = "<?= session()->getFlashdata('error') ?>";
+
+        if (successMsg) {
+            toastr.success(successMsg, "Success");
+        }
+        if (errorMsg) {
+            toastr.error(errorMsg, "Error");
         }
 
-        <?php if (session()->getFlashdata('success')): ?>
-            toastr.success("<?= session()->getFlashdata('success') ?>");
-        <?php endif; ?>
+        $("#addVehicleForm").submit(function (e) {
+            e.preventDefault();
 
-        <?php if (session()->getFlashdata('error')): ?>
-            toastr.error("<?= session()->getFlashdata('error') ?>");
-        <?php endif; ?>
-    </script>
+            $.ajax({
+                url: "<?= site_url('vehicles/add') ?>",
+                type: "POST",
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == "success") {
+                        toastr.success("Vehicle added successfully!", "Success");
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        toastr.error("Error adding vehicle.", "Error");
+                    }
+                },
+                error: function () {
+                    toastr.error("Something went wrong. Please try again.", "Error");
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 
 </html>
