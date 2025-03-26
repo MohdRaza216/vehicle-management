@@ -26,7 +26,25 @@ class VehiclesController extends BaseController
     {
         try {
             $vehicleModel = new VehicleModel();
+            $validation = \Config\Services::validation();
 
+            // Define validation rules
+            $validation->setRules([
+                'name' => 'required|min_length[3]|max_length[255]',
+                'model' => 'required|min_length[2]|max_length[255]',
+                'price' => 'required|numeric',
+                'status' => 'required|in_list[Available,Pending,Booked]',
+            ]);
+
+            if (!$this->validate($validation->getRules())) {
+                // Return validation errors in JSON format
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'errors' => $validation->getErrors()
+                ]);
+            }
+
+            // Insert data if validation passes
             $data = [
                 'name' => $this->request->getPost('name'),
                 'model' => $this->request->getPost('model'),
@@ -35,9 +53,9 @@ class VehiclesController extends BaseController
             ];
 
             if ($vehicleModel->insert($data)) {
-                return $this->response->setJSON(['status' => 'success']);
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Vehicle added successfully']);
             } else {
-                return $this->response->setJSON(['status' => 'error', 'message' => $vehicleModel->errors()]);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to add vehicle']);
             }
         } catch (\Exception $e) {
             log_message('error', 'Error in add() method: ' . $e->getMessage());

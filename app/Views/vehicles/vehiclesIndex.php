@@ -104,47 +104,40 @@
 
     <!-- Flash Messages -->
     <script>
-    toastr.options = {
-        "closeButton": true,
-        "positionClass": "toast-top-right",
-        "timeOut": "3000",
-        "preventDuplicates": true
-    };
+        toastr.options = {
+            "closeButton": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000",
+            "preventDuplicates": true
+        };
 
-    $(document).ready(function () {
-        let successMsg = "<?= session()->getFlashdata('success') ?>";
-        let errorMsg = "<?= session()->getFlashdata('error') ?>";
+        $(document).ready(function () {
+            $("#addVehicleForm").submit(function (e) {
+                e.preventDefault();
 
-        if (successMsg) {
-            toastr.success(successMsg, "Success");
-        }
-        if (errorMsg) {
-            toastr.error(errorMsg, "Error");
-        }
-
-        $("#addVehicleForm").submit(function (e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: "<?= site_url('vehicles/add') ?>",
-                type: "POST",
-                data: $(this).serialize(),
-                dataType: "json",
-                success: function (response) {
-                    if (response.status == "success") {
-                        toastr.success("Vehicle added successfully!", "Success");
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        toastr.error("Error adding vehicle.", "Error");
+                $.ajax({
+                    url: "<?= site_url('vehicles/add') ?>",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "success") {
+                            toastr.success(response.message, "Success");
+                            setTimeout(() => location.reload(), 1500);
+                        } else if (response.status === "error") {
+                            $(".error-message").remove();
+                            $.each(response.errors, function (field, message) {
+                                $("#" + field).after('<small class="text-danger error-message">' + message + '</small>');
+                            });
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong. Please try again.", "Error");
                     }
-                },
-                error: function () {
-                    toastr.error("Something went wrong. Please try again.", "Error");
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 
 </body>
 
