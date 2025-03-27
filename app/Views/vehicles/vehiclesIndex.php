@@ -28,6 +28,7 @@
                     <th>Vehicle Model</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,6 +41,13 @@
                             <td><?= esc($vehicle['model']) ?></td>
                             <td><?= esc($vehicle['price']) ?></td>
                             <td><?= esc($vehicle['status']) ?></td>
+                            <td>
+                                <button class="btn btn-primary editVehicleBtn" data-id="<?= $vehicle['id'] ?>"
+                                    data-name="<?= $vehicle['name'] ?>" data-model="<?= $vehicle['model'] ?>"
+                                    data-price="<?= $vehicle['price'] ?>" data-bs-toggle="modal"
+                                    data-bs-target="#editVehicleModal">Edit</button>
+
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -92,6 +100,54 @@
         </div>
     </div>
 
+    <!-- Edit Vehicle Modal -->
+    <div class="modal fade" id="editVehicleModal" tabindex="-1" aria-labelledby="editVehicleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVehicleModalLabel">Edit Vehicle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editVehicleForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="editVehicleId" name="id">
+
+                        <div class="mb-3">
+                            <label for="editVehicleName" class="form-label">Vehicle Name</label>
+                            <input type="text" class="form-control" id="editVehicleName" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editVehicleModel" class="form-label">Vehicle Model</label>
+                            <input type="text" class="form-control" id="editVehicleModel" name="model" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editVehiclePrice" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="editVehiclePrice" name="price" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editVehicleStatus" class="form-label">Status</label>
+                            <select class="form-control" id="editVehicleStatus" name="status">
+                                <option value="Available">Available</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Booked">Booked</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="updateVehicleBtn">Update Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
@@ -136,6 +192,77 @@
                     }
                 });
             });
+
+            $('.editVehicleBtn').click(function () {
+                var vehicleId = $(this).data('id');
+
+                $.ajax({
+                    url: '<?= base_url('vehicles/edit/') ?>' + vehicleId,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            var vehicle = response.data;
+                            $('#editVehicleId').val(vehicle.id);
+                            $('#editVehicleName').val(vehicle.name);
+                            $('#editVehicleModel').val(vehicle.model);
+                            $('#editVehiclePrice').val(vehicle.price);
+                            $('#editVehicleStatus').val(vehicle.status);
+
+                            $('#editVehicleModal').modal('show'); // Open the modal
+                        } else {
+                            toastr.error('Vehicle not found.');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Something went wrong.');
+                    }
+                });
+            });
+
+            $('#updateVehicleBtn').click(function (e) {
+                e.preventDefault();
+
+                let id = $('#editVehicleId').val();
+                let name = $('#editVehicleName').val();
+                let model = $('#editVehicleModel').val();
+                let price = $('#editVehiclePrice').val();
+                let status = $('#editVehicleStatus').val();
+
+                $.ajax({
+                    url: 'vehicles/update',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        name: name,
+                        model: model,
+                        price: price,
+                        status: status
+                    },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            toastr.success(response.message, "Success");
+
+                            let row = $('button[data-id="' + id + '"]').closest('tr');
+                            row.find('td:eq(1)').text(name);
+                            row.find('td:eq(2)').text(model);
+                            row.find('td:eq(3)').text(price);
+                            row.find('td:eq(4)').text(status);
+
+                            setTimeout(function () {
+                                $('#editVehicleModal').modal('hide');
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong.");
+                    }
+                });
+            });
+
         });
     </script>
 

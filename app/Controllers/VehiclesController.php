@@ -63,5 +63,61 @@ class VehiclesController extends BaseController
         }
     }
 
+    public function edit($id)
+    {
+        $vehicleModel = new VehicleModel();
+        $vehicle = $vehicleModel->find($id);
+
+        if ($vehicle) {
+            return $this->response->setJSON(['status' => 'success', 'data' => $vehicle]);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Vehicle not found']);
+        }
+    }
+
+    public function update()
+    {
+        $vehicleModel = new VehicleModel();
+
+        $id = $this->request->getPost('id');
+
+        // Validate input data
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'name' => 'required',
+            'model' => 'required',
+            'price' => 'required|numeric',
+            'status' => 'required'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $validation->getErrors()
+            ]);
+        }
+
+        // Update vehicle data
+        $updateData = [
+            'name' => $this->request->getPost('name'),
+            'model' => $this->request->getPost('model'),
+            'price' => $this->request->getPost('price'),
+            'status' => $this->request->getPost('status'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($vehicleModel->update($id, $updateData)) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Vehicle updated successfully.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to update vehicle.'
+            ]);
+        }
+    }
+
 
 }
