@@ -168,6 +168,7 @@
         };
 
         $(document).ready(function () {
+            // Add Vehicle AJAX
             $("#addVehicleForm").submit(function (e) {
                 e.preventDefault();
 
@@ -193,6 +194,7 @@
                 });
             });
 
+            // Edit Vehicle AJAX
             $('.editVehicleBtn').click(function () {
                 var vehicleId = $(this).data('id');
 
@@ -209,7 +211,7 @@
                             $('#editVehiclePrice').val(vehicle.price);
                             $('#editVehicleStatus').val(vehicle.status);
 
-                            $('#editVehicleModal').modal('show'); // Open the modal
+                            $('#editVehicleModal').modal('show');
                         } else {
                             toastr.error('Vehicle not found.');
                         }
@@ -220,41 +222,35 @@
                 });
             });
 
+            // Update Vehicle AJAX
             $('#updateVehicleBtn').click(function (e) {
                 e.preventDefault();
 
-                let id = $('#editVehicleId').val();
-                let name = $('#editVehicleName').val();
-                let model = $('#editVehicleModel').val();
-                let price = $('#editVehiclePrice').val();
-                let status = $('#editVehicleStatus').val();
-
                 $.ajax({
-                    url: 'vehicles/update',
-                    type: 'POST',
-                    data: {
-                        id: id,
-                        name: name,
-                        model: model,
-                        price: price,
-                        status: status
-                    },
-                    dataType: 'json',
+                    url: "<?= site_url('vehicles/update') ?>",
+                    type: "POST",
+                    data: $('#editVehicleForm').serialize(),
+                    dataType: "json",
                     success: function (response) {
-                        if (response.status === 'success') {
+                        $(".error-message").remove();
+
+                        if (response.status === "success") {
                             toastr.success(response.message, "Success");
 
-                            let row = $('button[data-id="' + id + '"]').closest('tr');
-                            row.find('td:eq(1)').text(name);
-                            row.find('td:eq(2)').text(model);
-                            row.find('td:eq(3)').text(price);
-                            row.find('td:eq(4)').text(status);
+                            let row = $('button[data-id="' + $('#editVehicleId').val() + '"]').closest('tr');
+                            row.find('td:eq(1)').text($('#editVehicleName').val());
+                            row.find('td:eq(2)').text($('#editVehicleModel').val());
+                            row.find('td:eq(3)').text($('#editVehiclePrice').val());
+                            row.find('td:eq(4)').text($('#editVehicleStatus').val());
 
-                            setTimeout(function () {
-                                $('#editVehicleModal').modal('hide');
-                            }, 1500);
+                            setTimeout(() => $('#editVehicleModal').modal('hide'), 1500);
+                        } else if (response.status === "error") {
+                            $.each(response.errors, function (field, message) {
+                                $("#editVehicle" + field.charAt(0).toUpperCase() + field.slice(1))
+                                    .after('<small class="text-danger error-message">' + message + '</small>');
+                            });
                         } else {
-                            toastr.error(response.message);
+                            toastr.error(response.message, "Error");
                         }
                     },
                     error: function () {

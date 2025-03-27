@@ -77,28 +77,27 @@ class VehiclesController extends BaseController
 
     public function update()
     {
-        $vehicleModel = new VehicleModel();
-
-        $id = $this->request->getPost('id');
-
-        // Validate input data
         $validation = \Config\Services::validation();
+
         $validation->setRules([
-            'name' => 'required',
-            'model' => 'required',
+            'id' => 'required|integer',
+            'name' => 'required|min_length[3]|max_length[255]',
+            'model' => 'required|min_length[2]|max_length[255]',
             'price' => 'required|numeric',
-            'status' => 'required'
+            'status' => 'required|in_list[Available,Pending,Booked]',
         ]);
 
-        if (!$validation->withRequest($this->request)->run()) {
+        if (!$this->validate($validation->getRules())) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'errors' => $validation->getErrors()
+                'errors' => $validation->getErrors(),
             ]);
         }
 
-        // Update vehicle data
-        $updateData = [
+        $vehicleModel = new \App\Models\VehicleModel();
+        $id = $this->request->getPost('id');
+
+        $data = [
             'name' => $this->request->getPost('name'),
             'model' => $this->request->getPost('model'),
             'price' => $this->request->getPost('price'),
@@ -106,15 +105,20 @@ class VehiclesController extends BaseController
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
-        if ($vehicleModel->update($id, $updateData)) {
+        $update = $vehicleModel->update($id, $data);
+        if (!$vehicleModel->find($id)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Vehicle not found']);
+        }
+
+        if ($update) {
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Vehicle updated successfully.'
+                'message' => 'Vehicle updated successfully!',
             ]);
         } else {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Failed to update vehicle.'
+                'message' => 'Failed to update vehicle. Try again.',
             ]);
         }
     }
