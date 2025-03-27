@@ -46,7 +46,7 @@
                                     data-name="<?= $vehicle['name'] ?>" data-model="<?= $vehicle['model'] ?>"
                                     data-price="<?= $vehicle['price'] ?>" data-bs-toggle="modal"
                                     data-bs-target="#editVehicleModal">Edit</button>
-
+                                <button class="btn btn-danger deleteVehicleBtn" data-id="<?= $vehicle['id'] ?>">Delete</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -259,6 +259,32 @@
                 });
             });
 
+            // Delete Vehicle AJAX
+            $('.deleteVehicleBtn').click(function () {
+                let vehicleId = $(this).data('id');
+
+                if (!confirm("Are you sure you want to delete this vehicle?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "<?= site_url('vehicles/delete') ?>",
+                    type: "POST",
+                    data: { id: vehicleId },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.status === "success") {
+                            toastr.success(response.message, "Success");
+                            $('button[data-id="' + vehicleId + '"]').closest('tr').remove();
+                        } else {
+                            toastr.error(response.message, "Error");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong. Please try again.", "Error");
+                    }
+                });
+            });
         });
     </script>
 

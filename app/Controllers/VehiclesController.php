@@ -124,4 +124,21 @@ class VehiclesController extends BaseController
     }
 
 
+    public function delete()
+    {
+        $id = $this->request->getPost('id');
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request.']);
+        }
+
+        $vehicleModel = new \App\Models\VehicleModel();
+
+        if ($vehicleModel->delete($id)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Vehicle deleted successfully!']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to delete vehicle.']);
+        }
+    }
+
 }

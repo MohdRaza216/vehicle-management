@@ -18,3 +18,4 @@ $routes->get('/vehicles', [\App\Controllers\VehiclesController::class, 'index'])
 $routes->post('/vehicles/add', [\App\Controllers\VehiclesController::class, 'add']);
 $routes->get('vehicles/edit/(:num)', [\App\Controllers\VehiclesController::class, 'edit']);
 $routes->post('vehicles/update', [\App\Controllers\VehiclesController::class, 'update']);
+$routes->post('vehicles/delete', [\App\Controllers\VehiclesController::class, 'delete']);
