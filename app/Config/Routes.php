@@ -25,4 +25,5 @@ $routes->get('/payments', [\App\Controllers\PaymentsController::class, 'index'])
 $routes->get('/payments/fetch', [\App\Controllers\PaymentsController::class, 'fetch']);
 $routes->post('/payments/store', [\App\Controllers\PaymentsController::class, 'store']);
 $routes->get('/payments/edit/(:num)', [\App\Controllers\PaymentsController::class, 'edit']);
+$routes->post('/payments/update/(:num)', [\App\Controllers\PaymentsController::class, 'update']);
 $routes->post('/payments/delete/(:num)', [\App\Controllers\PaymentsController::class, 'delete']);
