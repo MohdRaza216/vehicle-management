@@ -138,8 +138,11 @@
             $('#savePaymentBtn').click(function (e) {
                 e.preventDefault();
 
+                let paymentId = $("#paymentId").val();
+                let url = paymentId ? "<?= site_url('payments/update') ?>/" + paymentId : "<?= site_url('payments/store') ?>";
+
                 $.ajax({
-                    url: "<?= site_url('payments/store') ?>",
+                    url: url,
                     type: "POST",
                     data: $('#addPaymentForm').serialize(),
                     dataType: "json",
@@ -161,6 +164,7 @@
                     }
                 });
             });
+
 
 
             $(document).on("click", ".editPayment", function () {
