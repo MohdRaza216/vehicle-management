@@ -13,12 +13,22 @@
 
 <body>
 
-    <div class="container mt-4">
+    <div class="container mt-5">
         <h2>Vehicle Management</h2>
 
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+        <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
             Add Vehicle
         </button>
+
+        <div class="mb-3">
+            <label for="statusFilter" class="form-label">Filter by Status:</label>
+            <select id="statusFilter" class="form-control">
+                <option value="">All</option>
+                <option value="Available">Available</option>
+                <option value="Pending">Pending</option>
+                <option value="Booked">Booked</option>
+            </select>
+        </div>
 
         <table class="table table-bordered">
             <thead>
@@ -52,7 +62,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="text-center">No vehicles found.</td>
+                        <td colspan="6" class="text-center">No vehicles found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -81,14 +91,6 @@
                         <div class="mb-3">
                             <label for="price" class="form-label">Price</label>
                             <input type="number" class="form-control" id="price" name="price" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="status">
-                                <option value="Available">Available</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Booked">Booked</option>
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -126,15 +128,6 @@
                         <div class="mb-3">
                             <label for="editVehiclePrice" class="form-label">Price</label>
                             <input type="number" class="form-control" id="editVehiclePrice" name="price" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="editVehicleStatus" class="form-label">Status</label>
-                            <select class="form-control" id="editVehicleStatus" name="status">
-                                <option value="Available">Available</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Booked">Booked</option>
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">

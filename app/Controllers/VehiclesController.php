@@ -16,43 +16,35 @@ class VehiclesController extends BaseController
 
     public function index()
     {
-        $vehicleModel = new VehicleModel();
-        $data['vehicles'] = $vehicleModel->findAll();
-
+        $data['vehicles'] = $this->vehicleModel->findAll();
         return view('vehicles/vehiclesIndex', $data);
     }
 
     public function add()
     {
         try {
-            $vehicleModel = new VehicleModel();
-            $validation = \Config\Services::validation();
-
-            // Define validation rules
-            $validation->setRules([
-                'name' => 'required|min_length[3]|max_length[255]',
-                'model' => 'required|min_length[2]|max_length[255]',
+            $rules = [
+                'name' => 'required|min_length[3]|max_length[255]|is_unique[vehicles.name]',
+                'model' => 'required|min_length[2]|max_length[255]|is_unique[vehicles.model]',
                 'price' => 'required|numeric',
-                'status' => 'required|in_list[Available,Pending,Booked]',
-            ]);
+            ];
 
-            if (!$this->validate($validation->getRules())) {
-                // Return validation errors in JSON format
+            if (!$this->validate($rules)) {
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'errors' => $validation->getErrors()
+                    'errors' => $this->validator->getErrors()
                 ]);
             }
 
-            // Insert data if validation passes
+            // Set default status to 'Available'
             $data = [
                 'name' => $this->request->getPost('name'),
                 'model' => $this->request->getPost('model'),
                 'price' => $this->request->getPost('price'),
-                'status' => $this->request->getPost('status'),
+                'status' => 'Available', // Default status
             ];
 
-            if ($vehicleModel->insert($data)) {
+            if ($this->vehicleModel->insert($data)) {
                 return $this->response->setJSON(['status' => 'success', 'message' => 'Vehicle added successfully']);
             } else {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to add vehicle']);
@@ -65,8 +57,7 @@ class VehiclesController extends BaseController
 
     public function edit($id)
     {
-        $vehicleModel = new VehicleModel();
-        $vehicle = $vehicleModel->find($id);
+        $vehicle = $this->vehicleModel->find($id);
 
         if ($vehicle) {
             return $this->response->setJSON(['status' => 'success', 'data' => $vehicle]);
@@ -94,8 +85,20 @@ class VehiclesController extends BaseController
             ]);
         }
 
-        $vehicleModel = new \App\Models\VehicleModel();
         $id = $this->request->getPost('id');
+        $vehicle = $this->vehicleModel->find($id);
+
+        if (!$vehicle) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Vehicle not found']);
+        }
+
+        // Prevent status change if the vehicle is already booked
+        if ($vehicle['status'] === 'Booked' && $this->request->getPost('status') !== 'Booked') {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Cannot change status of a booked vehicle!',
+            ]);
+        }
 
         $data = [
             'name' => $this->request->getPost('name'),
@@ -105,12 +108,7 @@ class VehiclesController extends BaseController
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
-        $update = $vehicleModel->update($id, $data);
-        if (!$vehicleModel->find($id)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Vehicle not found']);
-        }
-
-        if ($update) {
+        if ($this->vehicleModel->update($id, $data)) {
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'Vehicle updated successfully!',
@@ -123,7 +121,6 @@ class VehiclesController extends BaseController
         }
     }
 
-
     public function delete()
     {
         $id = $this->request->getPost('id');
@@ -132,13 +129,21 @@ class VehiclesController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request.']);
         }
 
-        $vehicleModel = new \App\Models\VehicleModel();
-
-        if ($vehicleModel->delete($id)) {
+        if ($this->vehicleModel->delete($id)) {
             return $this->response->setJSON(['status' => 'success', 'message' => 'Vehicle deleted successfully!']);
         } else {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to delete vehicle.']);
         }
     }
 
+    public function filterVehicles()
+    {
+        $status = $this->request->getGet('status');
+        $vehicles = !empty($status) ? $this->vehicleModel->where('status', $status)->findAll() : $this->vehicleModel->findAll();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => $vehicles
+        ]);
+    }
 }
