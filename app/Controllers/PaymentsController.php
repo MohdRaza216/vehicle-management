@@ -17,7 +17,7 @@ class PaymentsController extends BaseController
 
         $data['payments'] = $paymentModel->findAll();
         $data['customers'] = $customerModel->findAll();
-        $data['vehicles'] = $vehicleModel->findAll();
+        $data['vehicles'] = $vehicleModel->where('status !=', 'Booked')->findAll();
 
         return view('payments/paymentsIndex', $data);
     }
@@ -74,6 +74,14 @@ class PaymentsController extends BaseController
         $paymentModel = new PaymentModel();
         $vehicleModel = new VehicleModel();
 
+        $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
+        if ($vehicle && $vehicle['status'] === 'Booked') {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'This vehicle is already booked. Payments are not allowed.'
+            ]);
+        }
+        
         $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
         if (!$vehicle) {
             return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Invalid vehicle!']);
