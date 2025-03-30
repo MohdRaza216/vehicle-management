@@ -159,9 +159,15 @@
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.error("AJAX Error:", error);
-                        toastr.error("Something went wrong!");
+                        console.error("AJAX Error:", xhr.responseText);
+
+                        let errorMessage = "Something went wrong!";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
                     }
+
                 });
             });
 
