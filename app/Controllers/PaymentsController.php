@@ -22,14 +22,13 @@ class PaymentsController extends BaseController
         return view('payments/paymentsIndex', $data);
     }
 
-
     public function fetch()
     {
         $paymentModel = new PaymentModel();
         $payments = $paymentModel->getPaymentsWithDetails();
 
         if (empty($payments)) {
-            return $this->response->setJSON([]);
+            return $this->response->setJSON(['html' => '<tr><td colspan="6" class="text-center">No records found</td></tr>']);
         }
 
         $html = "";
@@ -39,23 +38,21 @@ class PaymentsController extends BaseController
             $pendingAmount = max(0, $payment['vehicle_price'] - $totalPaid);
 
             $html .= "<tr>
-            <td>{$srNo}</td>
-            <td>{$payment['customer_name']}</td>
-            <td>{$payment['vehicle_name']}</td>
-            <td>{$payment['amount']}</td>
-            <td>{$pendingAmount}</td>
-            <td>
-                <button class='btn btn-sm btn-primary editPayment' data-id='{$payment['id']}'>Edit</button>
-                <button class='btn btn-sm btn-danger deletePayment' data-id='{$payment['id']}'>Delete</button>
-            </td>
-        </tr>";
+                <td>{$srNo}</td>
+                <td>{$payment['customer_name']}</td>
+                <td>{$payment['vehicle_name']}</td>
+                <td>{$payment['amount']}</td>
+                <td>{$pendingAmount}</td>
+                <td>
+                    <button class='btn btn-sm btn-primary editPayment' data-id='{$payment['id']}'>Edit</button>
+                    <button class='btn btn-sm btn-danger deletePayment' data-id='{$payment['id']}'>Delete</button>
+                </td>
+            </tr>";
             $srNo++;
         }
 
         return $this->response->setJSON(['html' => $html]);
     }
-
-
 
     public function store()
     {
@@ -75,6 +72,12 @@ class PaymentsController extends BaseController
         }
 
         $paymentModel = new PaymentModel();
+        $vehicleModel = new VehicleModel();
+
+        $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
+        if (!$vehicle) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Invalid vehicle!']);
+        }
 
         $data = [
             'customer_id' => $this->request->getPost('customer_id'),
@@ -82,10 +85,23 @@ class PaymentsController extends BaseController
             'amount' => $this->request->getPost('amount')
         ];
 
-        if (!$paymentModel->insert($data)) {
+        try {
+            if (!$paymentModel->insert($data)) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to insert payment!'
+                ]);
+            }
+        } catch (\Exception $e) {
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status' => 'error',
+                    'message' => 'This payment already exists!'
+                ]);
+            }
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
-                'message' => 'Failed to insert payment!'
+                'message' => 'Database error: ' . $e->getMessage()
             ]);
         }
 
@@ -94,7 +110,6 @@ class PaymentsController extends BaseController
             'message' => 'Payment added successfully!'
         ]);
     }
-
 
     public function edit($id)
     {
@@ -106,7 +121,6 @@ class PaymentsController extends BaseController
             return $this->response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Payment not found']);
         }
 
-        // Get total paid amount for the vehicle
         $totalPaid = $paymentModel->getTotalPaidAmount($payment['vehicle_id']);
         $vehicle = $vehicleModel->find($payment['vehicle_id']);
         $pendingAmount = max(0, $vehicle['price'] - $totalPaid);
@@ -119,7 +133,6 @@ class PaymentsController extends BaseController
             'pending_amount' => $pendingAmount
         ]);
     }
-
 
     public function update($id)
     {
@@ -139,10 +152,21 @@ class PaymentsController extends BaseController
         }
 
         $paymentModel = new PaymentModel();
-        $payment = $paymentModel->find($id);
+        $vehicleModel = new VehicleModel();
 
+        $payment = $paymentModel->find($id);
         if (!$payment) {
             return $this->response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Payment not found']);
+        }
+
+        $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
+        $totalPaid = $paymentModel->getTotalPaidAmount($vehicle['id']) - $payment['amount'] + $this->request->getPost('amount');
+
+        if ($totalPaid > $vehicle['price']) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Updated payment exceeds vehicle price!'
+            ]);
         }
 
         $data = [
@@ -152,6 +176,8 @@ class PaymentsController extends BaseController
         ];
 
         $paymentModel->update($id, $data);
+        $this->updateVehicleStatus($vehicle['id']);
+
         return $this->response->setJSON([
             'status' => 'success',
             'message' => 'Payment updated successfully!'
@@ -161,7 +187,6 @@ class PaymentsController extends BaseController
     public function delete($id)
     {
         $paymentModel = new PaymentModel();
-        $vehicleModel = new VehicleModel();
 
         $payment = $paymentModel->find($id);
         if ($payment) {
@@ -187,8 +212,7 @@ class PaymentsController extends BaseController
         }
 
         $pendingAmount = max(0, $vehicle['price'] - $totalPaid);
-        $status = ($pendingAmount == 0) ? 'Booked' : 'Pending';
-
+        $status = ($pendingAmount <= 0) ? 'Booked' : 'Pending';
 
         $vehicleModel->update($vehicleId, ['status' => $status]);
     }
