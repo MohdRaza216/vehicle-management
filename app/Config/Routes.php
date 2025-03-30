@@ -19,6 +19,7 @@ $routes->post('/vehicles/add', [\App\Controllers\VehiclesController::class, 'add
 $routes->get('/vehicles/edit/(:num)', [\App\Controllers\VehiclesController::class, 'edit']);
 $routes->post('/vehicles/update', [\App\Controllers\VehiclesController::class, 'update']);
 $routes->post('/vehicles/delete', [\App\Controllers\VehiclesController::class, 'delete']);
+$routes->get('vehicles/filter', [\App\Controllers\VehiclesController::class, 'filterVehicles']);
 
 // Payments Page
 $routes->get('/payments', [\App\Controllers\PaymentsController::class, 'index']);

@@ -13,10 +13,10 @@
 
 <body>
 
-    <div class="container mt-4">
+    <div class="container mt-5">
         <h2>Payments</h2>
 
-        <button class="btn btn-primary mb-3" id="addPaymentBtn">Add Payment</button>
+        <button class="btn btn-primary my-3" id="addPaymentBtn">Add Payment</button>
 
         <table class="table table-bordered">
             <thead>

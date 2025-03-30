@@ -13,12 +13,22 @@
 
 <body>
 
-    <div class="container mt-4">
+    <div class="container mt-5">
         <h2>Vehicle Management</h2>
 
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+        <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
             Add Vehicle
         </button>
+
+        <div class="mb-3">
+            <label for="statusFilter" class="form-label">Filter by Status:</label>
+            <select id="statusFilter" class="form-control">
+                <option value="">All</option>
+                <option value="Available">Available</option>
+                <option value="Pending">Pending</option>
+                <option value="Booked">Booked</option>
+            </select>
+        </div>
 
         <table class="table table-bordered">
             <thead>
@@ -31,7 +41,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="vehiclesTableBody">
                 <?php if (!empty($vehicles)): ?>
                     <?php $i = 1;
                     foreach ($vehicles as $vehicle): ?>
@@ -52,7 +62,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="text-center">No vehicles found.</td>
+                        <td colspan="6" class="text-center">No vehicles found.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -81,14 +91,6 @@
                         <div class="mb-3">
                             <label for="price" class="form-label">Price</label>
                             <input type="number" class="form-control" id="price" name="price" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="status">
-                                <option value="Available">Available</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Booked">Booked</option>
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -126,15 +128,6 @@
                         <div class="mb-3">
                             <label for="editVehiclePrice" class="form-label">Price</label>
                             <input type="number" class="form-control" id="editVehiclePrice" name="price" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="editVehicleStatus" class="form-label">Status</label>
-                            <select class="form-control" id="editVehicleStatus" name="status">
-                                <option value="Available">Available</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Booked">Booked</option>
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -195,7 +188,7 @@
             });
 
             // Edit Vehicle AJAX
-            $('.editVehicleBtn').click(function () {
+            $(document).on('click', '.editVehicleBtn', function () {
                 var vehicleId = $(this).data('id');
 
                 $.ajax({
@@ -260,7 +253,7 @@
             });
 
             // Delete Vehicle AJAX
-            $('.deleteVehicleBtn').click(function () {
+            $(document).on('click', '.deleteVehicleBtn', function () {
                 let vehicleId = $(this).data('id');
 
                 if (!confirm("Are you sure you want to delete this vehicle?")) {
@@ -276,6 +269,7 @@
                         if (response.status === "success") {
                             toastr.success(response.message, "Success");
                             $('button[data-id="' + vehicleId + '"]').closest('tr').remove();
+
                         } else {
                             toastr.error(response.message, "Error");
                         }
@@ -285,8 +279,78 @@
                     }
                 });
             });
+
+            // Filter Vehicles AJAX
+            $('#statusFilter').change(function () {
+                let selectedStatus = $(this).val();
+
+                $.ajax({
+                    url: '<?= base_url('vehicles/filter') ?>',
+                    type: 'GET',
+                    data: { status: selectedStatus },
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log(response); // Debugging: Check the structure of received data
+                        let tableBody = $('#vehiclesTableBody');
+                        tableBody.empty(); // Clear existing table rows
+
+                        if (!response.vehicles || response.vehicles.length === 0) {
+                            tableBody.append('<tr><td colspan="6" class="text-center">No vehicles found</td></tr>');
+                            return;
+                        }
+
+                        $.each(response.vehicles, function (index, vehicle) {
+                            tableBody.append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${vehicle.name}</td>
+                                    <td>${vehicle.model}</td>
+                                    <td>${vehicle.price}</td>
+                                    <td>${vehicle.status}</td>
+                                    <td>
+                                        <button class="btn btn-primary editVehicleBtn" data-id="${vehicle.id}"
+                                            data-name="${vehicle.name}" data-model="${vehicle.model}"
+                                            data-price="${vehicle.price}" data-status="${vehicle.status}"
+                                            data-bs-toggle="modal" data-bs-target="#editVehicleModal">Edit</button>
+                                        <button class="btn btn-danger deleteVehicleBtn" data-id="${vehicle.id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Error fetching filtered data.');
+                    }
+                });
+            });
+
         });
     </script>
+
+    <!-- Filter Vehicles AJAX -->
+    <!-- <script>
+        $(document).ready(function () {
+            function fetchVehicles(status = '') {
+                $.ajax({
+                    url: "<?= site_url('vehicles/filter') ?>",  // Endpoint to filter vehicles
+                    type: "GET",
+                    data: { status: status },  // Pass selected status
+                    success: function (response) {
+                        $("#vehiclesTableBody").html(response); // Load filtered data into table
+                    }
+                });
+            }
+
+            // Load all vehicles initially
+            fetchVehicles();
+
+            // Filter vehicles on status change
+            $("#statusFilter").change(function () {
+                let selectedStatus = $(this).val();
+                fetchVehicles(selectedStatus);
+            });
+        });
+    </script> -->
 
 </body>
 
