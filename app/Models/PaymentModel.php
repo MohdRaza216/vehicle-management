@@ -18,8 +18,14 @@ class PaymentModel extends Model
             ->findAll();
     }
 
-    public function getTotalPaidAmount($vehicleId)
+    public function getTotalPaidAmount($vehicleId, $customerId)
     {
-        return $this->selectSum('amount')->where('vehicle_id', $vehicleId)->get()->getRow()->amount ?? 0;
+        return $this->selectSum('amount')
+            ->where('vehicle_id', $vehicleId)
+            ->where('customer_id', $customerId)
+            ->get()
+            ->getRow()
+            ->amount ?? 0;
     }
+
 }
