@@ -146,18 +146,19 @@ class VehiclesController extends BaseController
     }
 
     public function filterVehicles()
-    {
-        $status = $this->request->getGet('status');
-        $vehicleModel = new VehicleModel();
+{
+    $status = $this->request->getGet('status');
+    $vehicleModel = new VehicleModel();
 
-        if (!empty($status)) {
-            $vehicles = $vehicleModel->where('status', $status)->findAll();
-        } else {
-            $vehicles = $vehicleModel->findAll(); // Get all if status is empty
-        }
-
-        return $this->response->setJSON($vehicles);
+    if (!empty($status)) {
+        $vehicles = $vehicleModel->where('status', $status)->findAll();
+    } else {
+        $vehicles = $vehicleModel->findAll(); // Get all vehicles if status is empty
     }
+
+    return $this->response->setJSON(['vehicles' => $vehicles]); // Return data in correct format
+}
+
 
 
 

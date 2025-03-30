@@ -280,44 +280,50 @@
                 });
             });
 
+            // Filter Vehicles AJAX
             $('#statusFilter').change(function () {
                 let selectedStatus = $(this).val();
 
                 $.ajax({
-                    url: '<?= base_url('vehicles/filter') ?>', // Uses CodeIgniter's base URL function
+                    url: '<?= base_url('vehicles/filter') ?>',
                     type: 'GET',
                     data: { status: selectedStatus },
                     dataType: 'json',
-                    success: function (vehicles) {
-                        console.log(vehicles); // Debugging: Check if data is received
-                        $('#vehiclesTableBody tbody').empty(); // Clear existing table rows
+                    success: function (response) {
+                        console.log(response); // Debugging: Check the structure of received data
+                        let tableBody = $('#vehiclesTableBody');
+                        tableBody.empty(); // Clear existing table rows
 
-                        if (vehicles.length === 0) {
-                            $('#vehiclesTableBody tbody').append('<tr><td colspan="6" class="text-center">No vehicles found</td></tr>');
+                        if (!response.vehicles || response.vehicles.length === 0) {
+                            tableBody.append('<tr><td colspan="6" class="text-center">No vehicles found</td></tr>');
                             return;
                         }
 
-                        $.each(vehicles, function (index, vehicle) {
-                            $('#vehiclesTableBody tbody').append(`
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${vehicle.name}</td>
-                            <td>${vehicle.model}</td>
-                            <td>${vehicle.price}</td>
-                            <td>${vehicle.status}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm edit-btn" data-id="${vehicle.id}">Edit</button>
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="${vehicle.id}">Delete</button>
-                            </td>
-                        </tr>
-                    `);
+                        $.each(response.vehicles, function (index, vehicle) {
+                            tableBody.append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${vehicle.name}</td>
+                                    <td>${vehicle.model}</td>
+                                    <td>${vehicle.price}</td>
+                                    <td>${vehicle.status}</td>
+                                    <td>
+                                        <button class="btn btn-primary editVehicleBtn" data-id="${vehicle.id}"
+                                            data-name="${vehicle.name}" data-model="${vehicle.model}"
+                                            data-price="${vehicle.price}" data-status="${vehicle.status}"
+                                            data-bs-toggle="modal" data-bs-target="#editVehicleModal">Edit</button>
+                                        <button class="btn btn-danger deleteVehicleBtn" data-id="${vehicle.id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `);
                         });
                     },
                     error: function () {
-                        alert('Error fetching filtered data.');
+                        toastr.error('Error fetching filtered data.');
                     }
                 });
             });
+
         });
     </script>
 

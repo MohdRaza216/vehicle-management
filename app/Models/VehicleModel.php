@@ -8,7 +8,7 @@ class VehicleModel extends Model
 {
     protected $table = 'vehicles';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['name', 'model', 'price', 'status'];
+    protected $allowedFields = ['name', 'model', 'price', 'status', 'created_at', 'updated_at'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
@@ -21,4 +21,3 @@ class VehicleModel extends Model
         return $this->findAll();
     }
 }
-
