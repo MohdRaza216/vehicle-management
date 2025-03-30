@@ -12,4 +12,13 @@ class VehicleModel extends Model
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
+
+    public function getVehiclesByStatus($status = null)
+    {
+        if ($status !== null) {
+            return $this->where('status', $status)->findAll();
+        }
+        return $this->findAll();
+    }
 }
+

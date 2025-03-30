@@ -41,7 +41,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="vehiclesTableBody">
                 <?php if (!empty($vehicles)): ?>
                     <?php $i = 1;
                     foreach ($vehicles as $vehicle): ?>
@@ -188,7 +188,7 @@
             });
 
             // Edit Vehicle AJAX
-            $('.editVehicleBtn').click(function () {
+            $(document).on('click', '.editVehicleBtn', function () {
                 var vehicleId = $(this).data('id');
 
                 $.ajax({
@@ -253,7 +253,7 @@
             });
 
             // Delete Vehicle AJAX
-            $('.deleteVehicleBtn').click(function () {
+            $(document).on('click', '.deleteVehicleBtn', function () {
                 let vehicleId = $(this).data('id');
 
                 if (!confirm("Are you sure you want to delete this vehicle?")) {
@@ -269,6 +269,7 @@
                         if (response.status === "success") {
                             toastr.success(response.message, "Success");
                             $('button[data-id="' + vehicleId + '"]').closest('tr').remove();
+
                         } else {
                             toastr.error(response.message, "Error");
                         }
@@ -278,8 +279,72 @@
                     }
                 });
             });
+
+            $('#statusFilter').change(function () {
+                let selectedStatus = $(this).val();
+
+                $.ajax({
+                    url: '<?= base_url('vehicles/filter') ?>', // Uses CodeIgniter's base URL function
+                    type: 'GET',
+                    data: { status: selectedStatus },
+                    dataType: 'json',
+                    success: function (vehicles) {
+                        console.log(vehicles); // Debugging: Check if data is received
+                        $('#vehiclesTableBody tbody').empty(); // Clear existing table rows
+
+                        if (vehicles.length === 0) {
+                            $('#vehiclesTableBody tbody').append('<tr><td colspan="6" class="text-center">No vehicles found</td></tr>');
+                            return;
+                        }
+
+                        $.each(vehicles, function (index, vehicle) {
+                            $('#vehiclesTableBody tbody').append(`
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${vehicle.name}</td>
+                            <td>${vehicle.model}</td>
+                            <td>${vehicle.price}</td>
+                            <td>${vehicle.status}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm edit-btn" data-id="${vehicle.id}">Edit</button>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${vehicle.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                        });
+                    },
+                    error: function () {
+                        alert('Error fetching filtered data.');
+                    }
+                });
+            });
         });
     </script>
+
+    <!-- Filter Vehicles AJAX -->
+    <!-- <script>
+        $(document).ready(function () {
+            function fetchVehicles(status = '') {
+                $.ajax({
+                    url: "<?= site_url('vehicles/filter') ?>",  // Endpoint to filter vehicles
+                    type: "GET",
+                    data: { status: status },  // Pass selected status
+                    success: function (response) {
+                        $("#vehiclesTableBody").html(response); // Load filtered data into table
+                    }
+                });
+            }
+
+            // Load all vehicles initially
+            fetchVehicles();
+
+            // Filter vehicles on status change
+            $("#statusFilter").change(function () {
+                let selectedStatus = $(this).val();
+                fetchVehicles(selectedStatus);
+            });
+        });
+    </script> -->
 
 </body>
 

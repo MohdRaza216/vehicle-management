@@ -23,11 +23,16 @@ class VehiclesController extends BaseController
     public function add()
     {
         try {
+            $vehicleModel = new VehicleModel();
+
+            // Define validation rules
             $rules = [
-                'name' => 'required|min_length[3]|max_length[255]|is_unique[vehicles.name]',
-                'model' => 'required|min_length[2]|max_length[255]|is_unique[vehicles.model]',
+                'name' => 'required|min_length[3]|max_length[255]|is_unique[vehicles.name,id,{id}]',
+                'model' => 'required|min_length[2]|max_length[255]|is_unique[vehicles.model,id,{id}]',
                 'price' => 'required|numeric',
+                'status' => 'required|in_list[Available,Pending,Booked]',
             ];
+
 
             if (!$this->validate($rules)) {
                 return $this->response->setJSON([
@@ -36,7 +41,8 @@ class VehiclesController extends BaseController
                 ]);
             }
 
-            // Set default status to 'Available'
+
+            // Insert data if validation passes
             $data = [
                 'name' => $this->request->getPost('name'),
                 'model' => $this->request->getPost('model'),
@@ -107,8 +113,11 @@ class VehiclesController extends BaseController
             'status' => $this->request->getPost('status'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
+        $vehicleModel = new VehicleModel();
+        $update = $vehicleModel->update($id, $data);
 
-        if ($this->vehicleModel->update($id, $data)) {
+
+        if ($update) {
             return $this->response->setJSON([
                 'status' => 'success',
                 'message' => 'Vehicle updated successfully!',
@@ -139,11 +148,17 @@ class VehiclesController extends BaseController
     public function filterVehicles()
     {
         $status = $this->request->getGet('status');
-        $vehicles = !empty($status) ? $this->vehicleModel->where('status', $status)->findAll() : $this->vehicleModel->findAll();
+        $vehicleModel = new VehicleModel();
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'data' => $vehicles
-        ]);
+        if (!empty($status)) {
+            $vehicles = $vehicleModel->where('status', $status)->findAll();
+        } else {
+            $vehicles = $vehicleModel->findAll(); // Get all if status is empty
+        }
+
+        return $this->response->setJSON($vehicles);
     }
+
+
+
 }
