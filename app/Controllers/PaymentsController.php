@@ -75,13 +75,23 @@ class PaymentsController extends BaseController
         $vehicleModel = new VehicleModel();
 
         $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
+        $totalPaid = $paymentModel->getTotalPaidAmount($vehicle['id'], $this->request->getPost('customer_id')) + $this->request->getPost('amount');
+
+        if ($totalPaid > $vehicle['price']) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Updated payment exceeds vehicle price!'
+            ]);
+        }
+
+        $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
         if ($vehicle && $vehicle['status'] === 'Booked') {
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'This vehicle is already booked. Payments are not allowed.'
             ]);
         }
-        
+
         $vehicle = $vehicleModel->find($this->request->getPost('vehicle_id'));
         if (!$vehicle) {
             return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Invalid vehicle!']);
