@@ -111,15 +111,14 @@
                     dataType: "json",
                     success: function (response) {
                         console.log(response);
-                        $("#paymentsTableBody").html(response.html);
+                        $("#paymentsTableBody").html(response.html); // Ensure this contains the new table rows
                     },
                     error: function (xhr, status, error) {
                         console.error("AJAX Error:", error);
+                        toastr.error('Failed to load payments.');
                     }
                 });
             }
-
-
 
             $("#addPaymentBtn").click(function () {
                 $("#paymentModalLabel").text("Add Payment");
@@ -160,18 +159,14 @@
                     },
                     error: function (xhr, status, error) {
                         console.error("AJAX Error:", xhr.responseText);
-
                         let errorMessage = "Something went wrong!";
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
                         toastr.error(errorMessage);
                     }
-
                 });
             });
-
-
 
             $(document).on("click", ".editPayment", function () {
                 let id = $(this).data("id");
@@ -188,6 +183,9 @@
                         $("#pending_amount").val(data.pending_amount);
                         $("#paymentModalLabel").text("Edit Payment");
                         $("#paymentModal").modal("show");
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error("Failed to fetch payment data.");
                     }
                 });
             });
@@ -200,8 +198,15 @@
                         url: "<?= site_url('payments/delete') ?>/" + id,
                         type: "POST",
                         success: function (response) {
-                            toastr.success(response.message);
-                            loadPayments();
+                            if (response.success) {
+                                toastr.success(response.message);
+                                loadPayments(); // Refresh payment list
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            toastr.error('Failed to delete payment.');
                         }
                     });
                 }
