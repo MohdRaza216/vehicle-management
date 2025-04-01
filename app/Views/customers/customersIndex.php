@@ -65,20 +65,20 @@
                     <div class="modal-body">
                         <div id="addErrorMsg" class="alert alert-danger d-none"></div>
                         <div class="mb-3">
-                            <label>Name:</label>
+                            <label for="name">Name:</label>
                             <input type="text" name="name" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label>Email:</label>
+                            <label for="email">Email:</label>
                             <input type="email" name="email" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label>Mobile Number:</label>
+                            <label for="mobile_number">Mobile Number:</label>
                             <input type="text" name="mobile_number" class="form-control">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Add</button>
+                        <button type="submit" class="btn btn-success">Add Customer</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -100,15 +100,15 @@
                         <div id="editErrorMsg" class="alert alert-danger d-none"></div>
                         <input type="hidden" name="id" id="editCustomerId">
                         <div class="mb-3">
-                            <label>Name:</label>
+                            <label for="name">Name:</label>
                             <input type="text" name="name" id="editCustomerName" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label>Email:</label>
+                            <label for="email">Email:</label>
                             <input type="email" name="email" id="editCustomerEmail" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label>Mobile Number:</label>
+                            <label for="mobile_number">Mobile Number:</label>
                             <input type="text" name="mobile_number" id="editCustomerMobile" class="form-control">
                         </div>
                     </div>

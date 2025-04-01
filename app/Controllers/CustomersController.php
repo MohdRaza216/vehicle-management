@@ -45,7 +45,7 @@ class CustomersController extends BaseController
         }
 
         $data = [
-            'name'  => $this->request->getPost('name'),
+            'name' => $this->request->getPost('name'),
             'email' => $email,
             'mobile_number' => $this->request->getPost('mobile_number'),
         ];
@@ -87,7 +87,7 @@ class CustomersController extends BaseController
         }
 
         $data = [
-            'name'  => $this->request->getPost('name'),
+            'name' => $this->request->getPost('name'),
             'email' => $email,
             'mobile_number' => $this->request->getPost('mobile_number'),
         ];

@@ -82,7 +82,7 @@
                             <input type="text" class="form-control" id="pending_amount" readonly>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" id="savePaymentBtn" class="btn btn-success">Save Payment</button>
+                            <button type="submit" id="AddPaymentBtn" class="btn btn-success">Add Payment</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </form>
@@ -134,7 +134,7 @@
                 $("#pending_amount").val(pending);
             });
 
-            $('#savePaymentBtn').click(function (e) {
+            $('#AddPaymentBtn').click(function (e) {
                 e.preventDefault();
 
                 let paymentId = $("#paymentId").val();

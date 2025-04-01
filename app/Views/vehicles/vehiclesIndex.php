@@ -94,17 +94,17 @@
                             <label for="price" class="form-label">Price</label>
                             <input type="number" class="form-control" id="price" name="price" required>
                         </div>
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select class="form-control" id="status" name="status" required>
-                            <option value="Available">Available</option>
-                        </select>
-                    </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="Available">Available</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Add Vehicle</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Add Vehicle</button>
                     </div>
                 </form>
             </div>
