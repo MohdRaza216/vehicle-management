@@ -123,11 +123,15 @@ class PaymentsController extends BaseController
             ]);
         }
 
+        // Update vehicle status after the payment is inserted
+        $this->updateVehicleStatus($vehicle['id'], $this->request->getPost('customer_id'));
+
         return $this->response->setJSON([
             'status' => 'success',
             'message' => 'Payment added successfully!'
         ]);
     }
+
 
     public function edit($id)
     {
