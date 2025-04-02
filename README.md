@@ -1,68 +1,66 @@
-# CodeIgniter 4 Application Starter
+# Vehicle Management System
 
-## What is CodeIgniter?
+## 📌 Overview
+The **Vehicle Management System** is a web-based application developed using **CodeIgniter 4.6.0, PHP, MySQL, jQuery, and AJAX**. It allows efficient management of **customers, vehicles, and payments** with real-time updates and seamless user interactions.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## 🚀 Features
+- **Customer Management**: Add, edit, and delete customers using AJAX-based CRUD operations.
+- **Vehicle Management**:
+  - Add, edit, delete, and filter vehicles by status (**Available, Pending, Booked**).
+  - Vehicles automatically update status based on payment completion.
+- **Payments Module**:
+  - Tracks total and pending amounts per customer.
+  - Restricts payments for **Booked** vehicles.
+  - Updates vehicle status dynamically.
+- **AJAX-Based Interactions**: Ensures smooth user experience without full page reloads.
+- **Server-Side Validation**: Uses CodeIgniter’s validation system for data integrity.
+- **Toastr Notifications**: Provides real-time feedback for actions.
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## 🛠️ Installation Guide
+1. **Clone the repository**:
+   ```sh
+   git clone https://github.com/MohdRaza216/vehicle-management.git
+   ```
+2. **Move to project directory**:
+   ```sh
+   cd vehicle-management
+   ```
+3. **Set up the database**:
+   - Create a database named **vehicle_management** in phpMyAdmin.
+   - Import the provided SQL file (`database/vehicle_management.sql`).
+4. **Configure Environment Variables**:
+   - Rename `.env.example` to `.env` and update the database credentials:
+     ```env
+     database.default.hostname = localhost
+     database.default.database = vehicle_management
+     database.default.username = root
+     database.default.password =
+     database.default.DBDriver = MySQLi
+     ```
+5. **Start the server**:
+   ```sh
+   php spark serve
+   ```
+6. **Access the application**:
+   Open your browser and visit: `http://localhost:8080`
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## 📂 Folder Structure
+```
+vehicle-management/
+│-- app/
+│   ├── Controllers/  # Handles requests & business logic
+│   ├── Models/       # Database interactions
+│   ├── Views/        # HTML templates & UI files
+│-- public/           # Frontend assets (CSS, JS, images)
+│-- writable/         # Logs & cache
+│-- .env              # Environment configuration
+│-- composer.json     # PHP dependencies
+│-- README.md         # Project documentation
+```
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## 🏆 Contributing
+Feel free to submit issues and pull requests to improve this project! 🚀
 
-## Installation & updates
+## 📜 License
+This project is **open-source** and available under the [MIT License](LICENSE).
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
-
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
-
-## Setup
-
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
-
-## Important Change with index.php
-
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
-
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
-
-**Please** read the user guide for a better explanation of how CI4 works!
-
-## Repository Management
-
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
-
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
-
-## Server Requirements
-
-PHP version 8.1 or higher is required, with the following extensions installed:
-
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
